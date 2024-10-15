@@ -13,6 +13,7 @@ def connect_to_gsheets():
     creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
     client = gspread.authorize(creds)
     logging.info('Połączono z Google Sheets')
+    print('Połączono z Google Sheets')
     return client
 
 def read_data_from_sheets(client):
@@ -22,6 +23,7 @@ def read_data_from_sheets(client):
     data = sheet.get_all_records()  # Pobiera wszystkie rekordy
     df = pd.DataFrame(data)
     logging.info(f"Odczytano {len(df)} wierszy z Google Sheets")
+    print(f"Odczytano {len(df)} wierszy z Google Sheets")
     return df
 
 def clean_data(df):
@@ -33,6 +35,7 @@ def clean_data(df):
     df_clean = df.dropna(thresh=5)
     removed_rows = initial_rows - len(df_clean)
     logging.info(f"Usunięto {removed_rows} wierszy z powodu brakujących wartości")
+    print(f"Usunięto {removed_rows} wierszy z powodu brakujących wartości")
 
     # Uzupełnianie braków dla kolumn numerycznych medianą
     numeric_cols = df_clean.select_dtypes(include='number').columns
@@ -44,18 +47,20 @@ def clean_data(df):
         df_clean[col] = df_clean[col].fillna(df_clean[col].mode()[0])
 
     logging.info(f"Uzupełniono brakujące wartości")
+    print(f"Uzupełniono brakujące wartości")
 
     # Przekształcanie kolumny 'Średnie Zarobki' na numeryczne wartości, wymuszając NaN na nieprawidłowych wartościach
     df_clean['Średnie Zarobki'] = pd.to_numeric(df_clean['Średnie Zarobki'], errors='coerce')
 
     # Uzupełnianie braków medianą po konwersji
-    df_clean['Średnie Zarobki'].fillna(df_clean['Średnie Zarobki'].median(), inplace=True)
+    df_clean['Średnie Zarobki'] = df_clean['Średnie Zarobki'].fillna(df_clean['Średnie Zarobki'].median())
 
     # Standaryzacja zarobków, jeśli kolumna istnieje
     if 'Średnie Zarobki' in df_clean.columns:
         scaler = StandardScaler()
         df_clean[['Średnie Zarobki']] = scaler.fit_transform(df_clean[['Średnie Zarobki']])
         logging.info("Przeprowadzono standaryzację kolumny 'Średnie Zarobki'")
+        print("Przeprowadzono standaryzację kolumny 'Średnie Zarobki'")
 
     return df_clean
 
@@ -70,6 +75,7 @@ def generate_report(df, df_clean):
         f.write(f"Procent uzupełnionych danych: {cleaned_rows/total_rows*100:.2f}%\n")
 
     logging.info("Wygenerowano raport: report.txt")
+    print("Wygenerowano raport: report.txt")
 
 def save_clean_data_to_sheets(df_clean, client):
     """Zapisuje przetworzone dane do Google Sheets."""
