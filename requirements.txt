@@ -1,4 +1,6 @@
 numpy
 pandas
-faker
-argparse
+gspread
+oauth2client
+scikit-learn
+logging
