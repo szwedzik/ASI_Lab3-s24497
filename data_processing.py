@@ -17,7 +17,7 @@ def connect_to_gsheets():
 
 def read_data_from_sheets(client):
     """Odczytuje dane z Google Sheets i konwertuje je do DataFrame."""
-    spreadsheet = client.open('Dane podróży')  # Podaj nazwę arkusza
+    spreadsheet = client.open('data_student_24497')  # Podaj nazwę arkusza
     sheet = spreadsheet.sheet1
     data = sheet.get_all_records()  # Pobiera wszystkie rekordy
     df = pd.DataFrame(data)
