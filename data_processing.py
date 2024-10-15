@@ -34,14 +34,28 @@ def clean_data(df):
     removed_rows = initial_rows - len(df_clean)
     logging.info(f"Usunięto {removed_rows} wierszy z powodu brakujących wartości")
 
-    # Uzupełnianie braków medianą
-    df_clean.fillna(df_clean.median(), inplace=True)
-    logging.info(f"Uzupełniono brakujące wartości za pomocą mediany")
+    # Uzupełnianie braków dla kolumn numerycznych medianą
+    numeric_cols = df_clean.select_dtypes(include='number').columns
+    df_clean[numeric_cols] = df_clean[numeric_cols].fillna(df_clean[numeric_cols].median())
 
-    # Standaryzacja zarobków
-    scaler = StandardScaler()
-    df_clean[['Średnie Zarobki']] = scaler.fit_transform(df_clean[['Średnie Zarobki']])
-    logging.info("Przeprowadzono standaryzację kolumny 'Średnie Zarobki'")
+    # Uzupełnianie braków dla kolumn nienumerycznych za pomocą trybu (najczęściej występującej wartości)
+    non_numeric_cols = df_clean.select_dtypes(exclude='number').columns
+    for col in non_numeric_cols:
+        df_clean[col] = df_clean[col].fillna(df_clean[col].mode()[0])
+
+    logging.info(f"Uzupełniono brakujące wartości")
+
+    # Przekształcanie kolumny 'Średnie Zarobki' na numeryczne wartości, wymuszając NaN na nieprawidłowych wartościach
+    df_clean['Średnie Zarobki'] = pd.to_numeric(df_clean['Średnie Zarobki'], errors='coerce')
+
+    # Uzupełnianie braków medianą po konwersji
+    df_clean['Średnie Zarobki'].fillna(df_clean['Średnie Zarobki'].median(), inplace=True)
+
+    # Standaryzacja zarobków, jeśli kolumna istnieje
+    if 'Średnie Zarobki' in df_clean.columns:
+        scaler = StandardScaler()
+        df_clean[['Średnie Zarobki']] = scaler.fit_transform(df_clean[['Średnie Zarobki']])
+        logging.info("Przeprowadzono standaryzację kolumny 'Średnie Zarobki'")
 
     return df_clean
 
@@ -59,7 +73,7 @@ def generate_report(df, df_clean):
 
 def save_clean_data_to_sheets(df_clean, client):
     """Zapisuje przetworzone dane do Google Sheets."""
-    spreadsheet = client.open('Dane podróży')
+    spreadsheet = client.open('data_student_24497')
     sheet = spreadsheet.sheet1
 
     # Czyszczenie starej zawartości
