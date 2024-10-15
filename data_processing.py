@@ -67,7 +67,7 @@ def save_clean_data_to_sheets(df_clean, client):
 
     # Zapisywanie nowych danych
     sheet.update([df_clean.columns.values.tolist()] + df_clean.values.tolist())
-    logging.info("Zapisano przetworzone dane do Google Sheets")
+    logging.info("Zapisano przetworzone dane do Google Sheets :)")
 
 if __name__ == "__main__":
     # Połączenie z Google Sheets
