@@ -27,6 +27,9 @@ jobs:
     - name: Run the analysis
       run: python main.py
 
+    - name: Display the results from evaluation_best_model.txt
+      run: cat evaluation_best_model.txt
+
     - name: Upload results
       uses: actions/upload-artifact@v4
       with:
