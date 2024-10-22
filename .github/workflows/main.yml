@@ -1,4 +1,4 @@
-name: Data processing workflow
+name: Run Analysis
 
 on:
   push:
@@ -21,17 +21,15 @@ jobs:
 
     - name: Install dependencies
       run: |
+        python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Set up Google API credentials
-      run: |
-        echo "${{ secrets.GOOGLE_API }}" > credentials.json
+    - name: Run the analysis
+      run: python main.py
 
-    - name: Run data processing script
-      run: python3 data_processing.py
-
-    - name: Show report
-      run: cat report.txt
-
-    - name: Display logs
-      run: cat log.txt
+    - name: Upload results
+      uses: actions/upload-artifact@v4
+      with:
+        name: results
+        path: "**/*.png, **/*.txt"
+        if-no-files-found: warn
