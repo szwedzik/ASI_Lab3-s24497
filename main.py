@@ -24,8 +24,13 @@ print("Brakujące wartości:\n", missing_values)
 # Usuwanie brakujących wartości
 df = df.dropna()
 
-# Analiza korelacji
-corr_matrix = df.corr()
+# Filtruj tylko zmienne numeryczne
+numeric_df = df.select_dtypes(include=['float64', 'int64'])
+
+# Obliczanie macierzy korelacji tylko dla zmiennych numerycznych
+corr_matrix = numeric_df.corr()
+
+# Wizualizacja macierzy korelacji
 plt.figure(figsize=(10, 8))
 sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
 plt.title("Macierz korelacji")
@@ -33,7 +38,7 @@ plt.savefig('correlation_matrix.png')
 plt.close()
 
 # Wizualizacja rozkładów zmiennych numerycznych
-for col in df.select_dtypes(include=['float64', 'int64']).columns:
+for col in numeric_df.columns:
     plt.figure()
     df[col].hist(bins=20)
     plt.title(f'Rozkład zmiennej {col}')
@@ -81,7 +86,7 @@ for model_name, model in models.items():
     results[model_name] = {'MSE': mse, 'R²': r2}
 
     # Zapis wyników do pliku
-    with open(f'evaluation_{model_name.replace(" ", "_")}.txt', 'w') as f:
+    with open(f'evaluation_{model_name.replace(" ", "_")}.txt', 'w', encoding='utf-8') as f:
         f.write(f'MSE: {mse}\nR²: {r2}\n')
 
     # Wizualizacja prognoz vs rzeczywiste wartości
@@ -113,4 +118,4 @@ best_r2 = r2_score(y_test, y_pred_best)
 # Zapis wyników optymalizacji
 with open('evaluation_best_model.txt', 'w') as f:
     f.write(f'Najlepszy model: Random Forest z GridSearchCV\n')
-    f.write(f'MSE: {best_mse}\nR²: {best_r2}\n')
+    f.write(f'MSE: {best_mse}\nR^2: {best_r2}\n')
