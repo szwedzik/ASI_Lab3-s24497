@@ -1,0 +1,56 @@
+# .github/workflows/docker-publish.yml
+name: Docker Build and Publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Klonowanie repozytorium
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      # 2. Instalacja Pythona i jego zależności
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          python train_model.py
+
+      # 3. Logowanie do Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 4. Budowanie obrazu Docker
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/my-predictor-app:latest .
+
+      # 5. Uruchomienie testowego kontenera i sprawdzenie działania
+      - name: Run Docker container for testing
+        run: |
+          docker run -d -p 5000:5000 --name predictor_test_container ${{ secrets.DOCKER_USERNAME }}/my-predictor-app:latest
+          sleep 5  # Poczekaj na uruchomienie kontenera
+
+      # 6. Testowanie API
+      - name: Test API endpoint
+        run: |
+          curl -X POST http://localhost:5000/predict -H "Content-Type: application/json" \
+          -d '{"features": {"longitude": -122.23, "latitude": 37.88, "housing_median_age": 41.0, "total_rooms": 880.0, "total_bedrooms": 129.0, "population": 322.0, "households": 126.0, "median_income": 8.3252, "ocean_proximity_INLAND": 0, "ocean_proximity_NEAR OCEAN": 1, "ocean_proximity_NEAR BAY": 0, "ocean_proximity_<1H OCEAN": 0}}'
+
+      # 7. Publikacja obrazu na Docker Hub (jeśli testy przejdą pomyślnie)
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/my-predictor-app:latest

@@ -1,4 +1,4 @@
 pandas
+flask
 scikit-learn
-matplotlib
-seaborn
+joblib

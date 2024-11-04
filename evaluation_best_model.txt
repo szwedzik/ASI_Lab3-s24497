@@ -1,3 +1,0 @@
-Najlepszy model: Random Forest z GridSearchCV
-MSE: 48.27906347569028
-R^2: 0.3633449169098487
