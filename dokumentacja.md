@@ -10,55 +10,76 @@ Celem projektu jest zbudowanie modelu predykcyjnego, który przewiduje wartość
 ## 2. Eksploracja i wstępna analiza danych
 
 ### 2.1. Wczytanie i zapoznanie się z danymi
-Dane zostały wczytane z pliku `CollegeDistance.csv`, a wstępne statystyki opisowe ukazują rozkład i właściwości zmiennych.
-
-- **Statystyki opisowe**: 
-    - Średnia, mediana, minimum, maksimum i odchylenie standardowe dla zmiennych numerycznych.
+Dane wczytano z pliku `CollegeDistance.csv`. Na podstawie wstępnych statystyk opisowych dla zmiennych numerycznych zidentyfikowano ich rozkład oraz kluczowe właściwości.
 
 ### 2.2. Brakujące wartości
-Nie wykryto brakujących wartości w żadnej z kolumn, co umożliwia bezpośrednie przystąpienie do dalszych kroków bez imputacji braków.
+Nie wykryto brakujących wartości, co umożliwiło bezpośrednie przejście do dalszych etapów analizy.
 
 ### 2.3. Analiza korelacji
-Obliczono macierz korelacji tylko dla zmiennych numerycznych, aby sprawdzić wzajemne zależności między nimi. Wyniki zostały zapisane jako `correlation_matrix.png`.
+Aby zidentyfikować zależności między zmiennymi numerycznymi, obliczono macierz korelacji. W wyniku analizy zauważono, że niektóre zmienne wykazują istotną korelację, co jest pomocne przy wyborze cech modelu.
+
+![Macierz korelacji](correlation_matrix.png)
+
+*Rysunek 1. Macierz korelacji dla zmiennych numerycznych. Obszary z intensywniejszym kolorem wskazują na wyższą korelację pomiędzy zmiennymi, co sugeruje ich powiązania.*
 
 ## 3. Inżynieria cech i przygotowanie danych
 
 ### 3.1. Przetwarzanie zmiennych kategorycznych i numerycznych
-- Zmienne kategoryczne zostały zakodowane za pomocą `OneHotEncoder`.
-- Zmienne numeryczne zostały standaryzowane przy użyciu `StandardScaler`.
+Zmienne kategoryczne zakodowano za pomocą `OneHotEncoder`, natomiast zmienne numeryczne standaryzowano przy użyciu `StandardScaler`, aby zminimalizować wpływ różnych skal.
 
 ### 3.2. Podział danych
-Dane zostały podzielone na zbiór treningowy (80%) i testowy (20%) w sposób losowy, z ustawieniem `random_state=42` dla powtarzalności wyników.
+Dane podzielono na zbiór treningowy (80%) i testowy (20%), co zapewniło warunki do oceny skuteczności modeli na nieznanych danych.
+
+### 3.3. Rozkłady zmiennych numerycznych
+Aby lepiej zrozumieć charakterystykę danych, dla każdej zmiennej numerycznej wygenerowano histogramy rozkładu:
+
+![Rozkład zmiennej 1](distribution_distance.png)
+
+*Rysunek 2. Histogram przedstawiający rozkład zmiennej `tuition`. Pokazuje, czy rozkład jest symetryczny lub czy posiada ekstremalne wartości.*
+
+![Rozkład zmiennej 2](distribution_tuition.png)
+
+*Rysunek 3. Histogram przedstawiający rozkład zmiennej `education`.*
+
+(...)
+
+Kontynuacja dla pozostałych zmiennych numerycznych.
 
 ## 4. Wybór i trenowanie modeli
 
 ### 4.1. Wybrane modele
-Do budowy modelu wybrano:
-- **Regresję liniową** - prosty model do wykrywania liniowych zależności.
-- **Las losowy** - model bardziej złożony, zdolny do uchwycenia nieliniowych zależności.
+Wybrano dwa modele o różnych charakterystykach:
+- **Regresję liniową** – dla oceny liniowych zależności.
+- **Las losowy** – dla uchwycenia bardziej złożonych zależności.
 
-### 4.2. Trenowanie modeli
-Każdy z modeli został wytrenowany na zbiorze treningowym, a ich prognozy przetestowano na zbiorze testowym.
+### 4.2. Trenowanie modeli i ocena wyników
+Dla każdego modelu wygenerowano wykresy porównujące wartości rzeczywiste zmiennej `score` z wartościami przewidywanymi:
+
+#### Model: Regresja liniowa
+![Prognozy vs Rzeczywiste dla Regresji Liniowej](predictions_vs_actuals_Linear_Regression.png)
+
+*Rysunek 4. Prognozy vs Rzeczywiste wartości dla modelu regresji liniowej. Wykres pokazuje, jak dobrze wartości prognozowane pasują do rzeczywistych.*
+
+#### Model: Las losowy
+![Prognozy vs Rzeczywiste dla Lasu Losowego](predictions_vs_actuals_Random_Forest.png)
+
+*Rysunek 5. Prognozy vs Rzeczywiste wartości dla modelu lasu losowego. Lepsze dopasowanie wskazuje na bardziej precyzyjne przewidywania.*
 
 ## 5. Ewaluacja i optymalizacja modelu
 
 ### 5.1. Metryki oceny
-Modele oceniono przy użyciu następujących metryk:
-- **MSE (Mean Squared Error)** - średni błąd kwadratowy
-- **R² (R-squared)** - współczynnik determinacji
+Modele oceniono za pomocą:
+- **MSE (Mean Squared Error)** – niższa wartość wskazuje na lepsze dopasowanie modelu.
+- **R² (R-squared)** – wyższa wartość oznacza, że model lepiej wyjaśnia zmienność danych.
 
-Wyniki dla każdego modelu zapisano w plikach `evaluation_Linear_Regression.txt` i `evaluation_Random_Forest.txt`. Wykresy porównujące rzeczywiste i prognozowane wartości zapisano jako `predictions_vs_actuals_{model_name}.png`.
+Wyniki zapisano w plikach `evaluation_Linear_Regression.txt` i `evaluation_Random_Forest.txt`.
 
 ### 5.2. Optymalizacja hiperparametrów
-Dla modelu lasu losowego przeprowadzono optymalizację hiperparametrów za pomocą `GridSearchCV`. Wyniki najlepszego modelu zapisano w pliku `evaluation_best_model.txt`.
+Optymalizację modelu lasu losowego przeprowadzono za pomocą `GridSearchCV`. Wyniki najlepszego modelu zapisano w `evaluation_best_model.txt`.
 
-## 6. Wyniki i wnioski
+![Wyniki Optymalizacji](hyperparameter_tuning_results.png)
 
-### 6.1. Wyniki modelu
-Plik `evaluation_best_model.txt` zawiera następujące wyniki najlepszego modelu:
-- **MSE**: wartość błędu kwadratowego dla najlepszego modelu,
-- **R²**: wartość współczynnika determinacji, która wskazuje, jak dobrze model wyjaśnia zmienność danych.
+*Rysunek 6. Wyniki optymalizacji hiperparametrów dla modelu lasu losowego. Wykres pokazuje wpływ liczby estymatorów oraz maksymalnej głębokości drzewa na wynik testu (R²). Wyższe wartości R² wskazują na lepszą skuteczność modelu przy danej kombinacji parametrów.*
 
-### 6.2. Wnioski
-- Model lasu losowego po optymalizacji hiperparametrów wykazał wyższą wartość R² oraz niższy MSE, co sugeruje, że jest bardziej skuteczny w przewidywaniu zmiennej `score` niż regresja liniowa.
-- W przyszłości można by rozważyć użycie bardziej zaawansowanych algorytmów lub dalszą inżynierię cech, aby poprawić jakość predykcji.
+## 6. Wnioski końcowe
+W wyniku analizy oraz optymalizacji stwierdzono, że model lasu losowego, po zastosowaniu odpowiednich hiperparametrów, przewyższa regresję liniową w przewidywaniu wartości `score`. Dalsze kroki mogą obejmować bardziej zaawansowane algorytmy oraz dodatkową inżynierię cech.
